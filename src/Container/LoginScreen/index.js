@@ -7,17 +7,18 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
+import SignUpScreen from '../SignUpScreen';
 
 const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    navigation.navigate('DashboardScreen');
+    // navigation.navigate('DashboardScreen');
   };
 
   const navigateToSignup = () => {
-    navigation.navigate('SignupScreen');
+    navigation.navigate(SignUpScreen);
   };
 
   return (
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: 400,
-    height: 400,
+    height: 350,
   },
   title: {
     marginTop: 20,
