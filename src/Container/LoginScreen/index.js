@@ -8,13 +8,27 @@ import {
   Image,
 } from 'react-native';
 import SignUpScreen from '../SignUpScreen';
+import DashboardScreen from '../DashboardScreen';
+import auth from '@react-native-firebase/auth';
 
 const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // navigation.navigate('DashboardScreen');
+  const handleLogin = async data => {
+    try {
+      const response = await auth().signInWithEmailAndPassword(email, password);
+      navigation.navigate('DashboardScreen');
+      console.log('User Logged in successfully!', response?.user);
+    } catch (error) {
+      if (error.code === 'auth/invalid-email') {
+        console.error('email', {
+          type: 'manual',
+          message: 'Invalid email address',
+        });
+      }
+      console.error(error);
+    }
   };
 
   const navigateToSignup = () => {
@@ -65,6 +79,7 @@ const LoginScreen = ({navigation}) => {
     </View>
   );
 };
+
 export default LoginScreen;
 
 const styles = StyleSheet.create({
