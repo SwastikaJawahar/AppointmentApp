@@ -21,130 +21,98 @@ function ProfileScreen() {
   const currentUser = auth().currentUser;
   const [dropVal, setDropVal] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+  const [userProfile, setUserProfile] = useState({
     contact: '',
-    userType: '',
-    speciality: '',
+    email: '',
     location: '',
+    name: '',
+    specialty: '',
+    qualification: '',
+    experience: '',
+    userType: '',
   });
 
   const renderLabel = () => {
     if (dropVal || isFocus) {
-      const selectedLabel = data.find(item => item.value === dropVal)?.label;
-      return (
-        <Text style={[styles.label, isFocus && {color: 'blue'}]}>
-          {selectedLabel || 'Select User Type'}
-        </Text>
-      );
+      // const selectedLabel = data.find(item => item.value === dropVal)?.label;
+      // return <Text style={[styles.label, isFocus && {color: 'blue'}]}></Text>;
     }
     return null;
   };
 
   useEffect(() => {
-    // Logic to handle immediate rendering when dropVal changes
-    if (dropVal === 'Doctor') {
-      setFormData({
-        ...formData,
-        userType: 'Doctor', // Ensure userType is updated immediately
-      });
-    } else {
-      setFormData({
-        ...formData,
-        userType: dropVal,
-        speciality: '', // Reset speciality when userType changes
-        location: '', // Reset location when userType changes
-      });
-    }
-  }, [dropVal]);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
+    // Fetch user profile information from Firestore
+    const fetchUserProfile = async () => {
       try {
-        if (currentUser) {
-          const userRef = firestore()
-            .collection('UserProfile')
-            .doc(currentUser.uid);
-          const userDoc = await userRef.get();
+        const uid = auth().currentUser.uid;
+        const userProfileRef = firestore().collection('UserProfile');
+        const userSnapshot = await userProfileRef.where('uid', '==', uid).get();
 
-          if (userDoc.exists) {
-            const userData = userDoc.data();
-            setFormData({
-              firstName: userData.firstName || '',
-              lastName: userData.lastName || '',
-              contact: userData.contact || '',
-              userType: userData.userType || '',
-              speciality: userData.speciality || '',
-              location: userData.location || '',
-            });
-          }
+        if (!userSnapshot.empty) {
+          const userData = userSnapshot.docs[0].data();
+          setUserProfile(userData);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('Error fetching user profile:', error);
       }
     };
 
-    fetchUserData();
-  }, [currentUser]);
-  const handleInputChange = (name, value) => {
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const submitData = async () => {
+    fetchUserProfile();
+  }, []);
+  const handleSaveProfile = async () => {
+    // Save the updated profile back to Firestore
     try {
-      const userObject = {
-        userId: currentUser.uid,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        contact: formData.contact,
-        userType: formData.userType,
-        speciality: formData.speciality,
-        location: formData.location,
-        author: 'Swastika',
-      };
+      const uid = auth().currentUser.uid;
+      const userProfileRef = firestore().collection('UserProfile');
+      const userSnapshot = await userProfileRef.where('uid', '==', uid).get();
 
-      const userRef = firestore()
-        .collection('UserProfile')
-        .doc(currentUser.uid);
-
-      const userDoc = await userRef.get();
-
-      if (userDoc.exists) {
-        await userRef.update(userObject);
-      } else {
-        await userRef.set(userObject);
+      if (userProfile.userType === 'patient') {
+        // Update only patient-specific fields
+        await userProfileRef.doc(userSnapshot.docs[0].id).update({
+          name: userProfile.name,
+          email: userProfile.email,
+          contact: userProfile.contact,
+        });
+      } else if (userProfile.userType === 'doctor') {
+        // Update only doctor-specific fields
+        await userProfileRef.doc(userSnapshot.docs[0].id).update({
+          name: userProfile.name,
+          email: userProfile.email,
+          contact: userProfile.contact,
+          location: userProfile.location,
+          specialty: userProfile.specialty,
+          qualification: userProfile.qualification,
+          experience: userProfile.experience,
+        });
       }
 
-      Alert.alert('Success', 'User data saved successfully!');
+      console.log('User profile updated successfully!');
+      Alert.alert('User Updated Successfully.!');
     } catch (error) {
-      console.error('Error saving user data:', error);
-      Alert.alert('Error', 'Failed to save user data. Please try again.');
+      console.error('Error updating user profile:', error);
     }
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <View>
         <TextInput
           style={styles.textInput}
-          placeholder="First Name"
-          value={formData.firstName}
-          onChangeText={text => handleInputChange('firstName', text)}
+          placeholder="Enter Name"
+          value={userProfile.name}
+          onChangeText={text => setUserProfile({...userProfile, name: text})}
         />
         <TextInput
           style={styles.textInput}
-          placeholder="Last Name"
-          value={formData.lastName}
-          onChangeText={text => handleInputChange('lastName', text)}
+          placeholder="Enter email"
+          value={userProfile.email}
+          onChangeText={text => setUserProfile({...userProfile, email: text})}
         />
         <TextInput
           style={styles.textInput}
           placeholder="Contact No"
-          value={formData.contact}
-          onChangeText={text => handleInputChange('contact', text)}
+          value={userProfile.contact}
+          onChangeText={text => setUserProfile({...userProfile, contact: text})}
         />
         <View>
           {renderLabel()}
@@ -165,23 +133,43 @@ function ProfileScreen() {
             }}
           />
         </View>
-        {formData.userType === 'Doctor' && (
+        {userProfile.userType === 'doctor' && (
           <View>
             <TextInput
               style={styles.textInput}
-              placeholder="Speciality"
-              value={formData.speciality}
-              onChangeText={text => handleInputChange('speciality', text)}
+              placeholder="specialty"
+              value={userProfile.specialty}
+              onChangeText={text =>
+                setUserProfile({...userProfile, specialty: text})
+              }
             />
             <TextInput
               style={styles.textInput}
               placeholder="location"
-              value={formData.location}
-              onChangeText={text => handleInputChange('location', text)}
+              value={userProfile.location}
+              onChangeText={text =>
+                setUserProfile({...userProfile, location: text})
+              }
+            />
+            <TextInput
+              style={styles.textInput}
+              placeholder="Qualification"
+              value={userProfile.qualification}
+              onChangeText={text =>
+                setUserProfile({...userProfile, qualification: text})
+              }
+            />
+            <TextInput
+              style={styles.textInput}
+              placeholder="Experience"
+              value={userProfile.experience}
+              onChangeText={text =>
+                setUserProfile({...userProfile, experience: text})
+              }
             />
           </View>
         )}
-        <TouchableOpacity style={styles.action} onPress={submitData}>
+        <TouchableOpacity style={styles.action} onPress={handleSaveProfile}>
           <Text style={styles.buttonText}>Save</Text>
         </TouchableOpacity>
       </View>
@@ -246,6 +234,7 @@ const styles = StyleSheet.create({
   },
   placeholderStyle: {
     fontSize: 14,
+    paddingVertical: 12,
   },
   selectedTextStyle: {
     fontSize: 14,

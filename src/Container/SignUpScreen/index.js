@@ -52,8 +52,8 @@ const SignUpScreen = props => {
         .doc(userObject.uid)
         .set(userObject);
 
-      Alert('SignUp Completed.!');
-      props.navigation.navigate('DashboardScreen');
+      Alert.alert('SignUp Completed.!');
+      props.navigation.navigate('LoginScreen');
     } catch {}
   };
 
