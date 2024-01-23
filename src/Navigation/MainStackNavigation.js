@@ -6,29 +6,29 @@ import SignUpScreen from '../Container/SignUpScreen';
 import ProfileScreen from '../Container/ProfileScreen';
 import firestore from '@react-native-firebase/firestore';
 import DashboardScreen from '../Container/DashboardScreen';
-import {createDrawerNavigator} from '@react-navigation/drawer';
+// import {createDrawerNavigator} from '@react-navigation/drawer';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+
 const Stack = createNativeStackNavigator();
-const Drawer = createDrawerNavigator();
-function AppDrawer() {
+// const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
+function MyTabs() {
   return (
-    <Drawer.Navigator>
-      <Drawer.Screen name="ProfileScreen" component={ProfileScreen} />
-    </Drawer.Navigator>
+    <Tab.Navigator>
+      <Tab.Screen name="ProfileScreen" component={ProfileScreen} />
+      <Tab.Screen name="DashboardScreen" component={DashboardScreen} />
+    </Tab.Navigator>
   );
 }
 
-function HomeStackScreen() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="DrawerScreen"
-        component={AppDrawer}
-        options={{headerShown: true}}
-      />
-      <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
-    </Stack.Navigator>
-  );
-}
+// function HomeStackScreen() {
+//   return (
+//     <Stack.Navigator>
+//       <Stack.Screen name="TabScreen" component={MyTabs} />
+//       <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
+//     </Stack.Navigator>
+//   );
+// }
 function AuthStackScreen() {
   return (
     <Stack.Navigator>
@@ -39,7 +39,7 @@ function AuthStackScreen() {
       />
       <Stack.Screen
         name="HomeStackScreen"
-        component={HomeStackScreen}
+        component={MyTabs}
         options={{headerShown: false}}
       />
       <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
@@ -51,11 +51,11 @@ const MainStackNavigation = () => {
     <Stack.Navigator>
       <Stack.Screen
         name="MainScreen"
-        component={true ? HomeStackScreen : AuthStackScreen}
+        component={AuthStackScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>
   );
 };
 
-export {MainStackNavigation, AuthStackScreen, AppDrawer};
+export {MainStackNavigation, AuthStackScreen};

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import {
 import auth from '@react-native-firebase/auth';
 import Modal from 'react-native-modal';
 import firestore from '@react-native-firebase/firestore';
-const SignUpScreen = ({navigation}) => {
+import DashboardScreen from '../DashboardScreen';
+const SignUpScreen = props => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState('patient');
   const [name, setName] = useState('');
@@ -36,12 +37,26 @@ const SignUpScreen = ({navigation}) => {
       await userCredential.user.updateProfile({
         displayName: name + '=' + selectedUserType,
       });
+      const userObject = {
+        uid: userCredential.user.uid,
+        name,
+        contact,
+        userType: selectedUserType,
+        // Add other properties based on the user type
+        ...(selectedUserType === 'doctor' && {specialty, location}),
+      };
+
+      // Add user data to Firestore
+      await firestore()
+        .collection('UserProfile')
+        .doc(userObject.uid)
+        .set(userObject);
+
+      Alert('SignUp Completed.!');
+      props.navigation.navigate('DashboardScreen');
     } catch {}
   };
 
-  const handleLogin = () => {
-    navigation.navigate('LoginScreen');
-  };
   const renderDoctorFields = () => {
     if (selectedUserType === 'doctor') {
       return (
