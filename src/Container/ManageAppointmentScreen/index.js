@@ -1,14 +1,14 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 
-const NewAppointmentScreen = () => {
+const ManageAppointmentScreen = () => {
   return (
     <View>
-      <Text>Appointment Screen</Text>
+      <Text>CreateAppointment</Text>
     </View>
   );
 };
 
-export default NewAppointmentScreen;
+export default ManageAppointmentScreen;
 
 const styles = StyleSheet.create({});
