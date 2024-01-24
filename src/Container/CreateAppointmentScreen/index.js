@@ -43,6 +43,9 @@ const CreateAppointmentScreen = () => {
       console.error('Error loading doctors:', error);
     }
   };
+  useEffect(() => {
+    searchDoctors();
+  }, [searchText]);
 
   const searchDoctors = () => {
     const filteredDoctors = allDoctors.filter(doctor =>

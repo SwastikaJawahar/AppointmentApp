@@ -42,7 +42,11 @@ function MyTabs() {
   return (
     <Tab.Navigator>
       <Tab.Screen name="ProfileScreen" component={ProfileScreen} />
-      <Tab.Screen name="DashboardScreen" component={DashboardScreen} />
+      <Tab.Screen
+        name="DashboardScreen"
+        component={DashboardScreen}
+        initialParams={{user: userType}}
+      />
       {userType === 'doctor' && (
         <Tab.Screen
           name="ManageAppointment"
