@@ -12,15 +12,17 @@ import {
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import DatePicker from 'react-native-date-picker';
 
 const CreateAppointmentScreen = () => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [appointmentDate, setAppointmentDate] = useState('');
+  const [appointmentDate, setAppointmentDate] = useState(new Date());
   const [appointmentTime, setAppointmentTime] = useState('');
   const [customMessage, setCustomMessage] = useState('');
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const delaySearch = setTimeout(() => {
@@ -112,7 +114,21 @@ const CreateAppointmentScreen = () => {
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalHeading}>Request Appointment</Text>
-
+          <Button title="Select Date" onPress={() => setOpen(true)} />
+          <DatePicker
+            style={styles.DatePicker}
+            modal
+            show={open}
+            date={appointmentDate}
+            mode={'date'}
+            onConfirm={AppDate => {
+              setOpen(false);
+              setAppointmentDate(AppDate);
+            }}
+            onCancel={() => {
+              setOpen(false);
+            }}
+          />
           <TextInput
             style={styles.modalInput}
             placeholder="Appointment Time"
@@ -149,14 +165,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#e3f1f1',
   },
   DatePicker: {
-    elevation: 2,
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 16,
-    backgroundColor: '#fff',
+    datePicker: {
+      marginTop: 16,
+      backgroundColor: '#fff',
+      borderRadius: 8,
+      elevation: 4,
+    },
   },
   searchInput: {
     height: 40,
