@@ -35,7 +35,7 @@ const SignUpScreen = props => {
       );
       console.log('User Account Created!');
       await userCredential.user.updateProfile({
-        displayName: name + '=' + selectedUserType,
+        displayName: name,
       });
       const userObject = {
         uid: userCredential.user.uid,

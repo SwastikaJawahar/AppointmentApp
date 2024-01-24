@@ -6,13 +6,11 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  Button,
-  Platform,
+  Alert,
   Modal,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import DatePicker from 'react-native-date-picker';
 
 const CreateAppointmentScreen = () => {
   const [searchText, setSearchText] = useState('');
@@ -22,51 +20,56 @@ const CreateAppointmentScreen = () => {
   const [appointmentDate, setAppointmentDate] = useState(new Date());
   const [appointmentTime, setAppointmentTime] = useState('');
   const [customMessage, setCustomMessage] = useState('');
-  const [open, setOpen] = useState(false);
+
+  const [allDoctors, setAllDoctors] = useState([]);
 
   useEffect(() => {
-    const delaySearch = setTimeout(() => {
-      console.log('Calling Search Doctors');
-      searchDoctors();
-    }, 300);
-
-    return () => clearTimeout(delaySearch);
-  }, [searchText]);
-
-  const searchDoctors = async () => {
+    // Load all doctors initially
+    loadAllDoctors();
+  }, []);
+  const loadAllDoctors = async () => {
     try {
       const doctorsRef = firestore().collection('UserProfile');
-      const query = doctorsRef
-        .where('userType', '==', 'doctor')
-        .where('specialty', '==', searchText);
-      console.log('Search Query:', searchText);
+      const query = doctorsRef.where('userType', '==', 'doctor');
       const results = await query.get();
 
       const doctors = results.docs.map(doc => {
         return {id: doc.id, ...doc.data()};
       });
-      console.log('Doctors Found:', doctors);
+
+      setAllDoctors(doctors);
       setSearchResults(doctors);
     } catch (error) {
-      console.error('Error searching for doctors:', error);
+      console.error('Error loading doctors:', error);
     }
+  };
+
+  const searchDoctors = () => {
+    const filteredDoctors = allDoctors.filter(doctor =>
+      doctor.specialty.toLowerCase().includes(searchText.toLowerCase()),
+    );
+    setSearchResults(filteredDoctors);
   };
 
   const requestAppointment = async () => {
     try {
       const userId = auth().currentUser.uid;
+      const userName = auth().currentUser.displayName;
+      console.log(userName);
       const appointmentRef = firestore().collection('Appointment');
 
       // Add the appointment record
       await appointmentRef.add({
         doctorId: selectedDoctor.id,
         patientId: userId,
+        patientName: userName,
+        doctorName: selectedDoctor.name,
         appointmentDate,
         appointmentTime,
         customMessage,
         status: 'pending',
       });
-
+      Alert.alert('Appointment Booked Successfully.!');
       setModalVisible(false);
     } catch (error) {
       console.error('Error requesting appointment:', error);
@@ -78,7 +81,7 @@ const CreateAppointmentScreen = () => {
       style={styles.doctorItem}
       onPress={() => setSelectedDoctor(item)}>
       <Text style={styles.doctorName}>{item.name}</Text>
-      <Text style={styles.doctorDetails}>{item.speciality}</Text>
+      <Text style={styles.doctorDetails}>{item.specialty}</Text>
       <Text style={styles.doctorDetails}>{item.location}</Text>
       <Text style={styles.doctorDetails}>{item.contact}</Text>
       <TouchableOpacity
@@ -101,6 +104,7 @@ const CreateAppointmentScreen = () => {
         onChangeText={text => setSearchText(text)}
       />
       <FlatList
+        style={styles.FlatList}
         data={searchResults}
         keyExtractor={item => item.id}
         renderItem={renderDoctorItem}
@@ -114,20 +118,11 @@ const CreateAppointmentScreen = () => {
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalHeading}>Request Appointment</Text>
-          <Button title="Select Date" onPress={() => setOpen(true)} />
-          <DatePicker
-            style={styles.DatePicker}
-            modal
-            show={open}
-            date={appointmentDate}
-            mode={'date'}
-            onConfirm={AppDate => {
-              setOpen(false);
-              setAppointmentDate(AppDate);
-            }}
-            onCancel={() => {
-              setOpen(false);
-            }}
+          <TextInput
+            style={styles.modalInput}
+            placeholder="Appointment Date"
+            value={appointmentDate}
+            onChangeText={text => setAppointmentDate(text)}
           />
           <TextInput
             style={styles.modalInput}
@@ -165,12 +160,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#e3f1f1',
   },
   DatePicker: {
-    datePicker: {
-      marginTop: 16,
-      backgroundColor: '#fff',
-      borderRadius: 8,
-      elevation: 4,
-    },
+    marginTop: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    elevation: 4,
+  },
+  FlatList: {
+    width: '100%',
+    marginLeft: 70,
   },
   searchInput: {
     height: 40,
@@ -209,6 +206,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
     flex: 1,
