@@ -92,13 +92,14 @@ const DashboardScreen = props => {
     <View style={styles.container}>
       {/* <View style={styles.logout}>
         <TouchableOpacity
-          // style={styles.TouchableOpacity}
+          style={styles.TouchableOpacity}
           onPress={handleLogout}>
           <Icons name="logout" size={40} />
         </TouchableOpacity>
       </View> */}
       <View style={styles.container}>
         <FlatList
+          style={styles.FlatList}
           data={appointments}
           keyExtractor={item => item.id}
           renderItem={renderAppointmentItem}
@@ -117,6 +118,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#e3f1f1',
+  },
+  FlatList: {
+    width: '100%',
+    marginHorizontal: 16,
+    marginLeft: 10,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  appointmentItem: {
+    width: '150%',
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  appointmentName: {
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: 'bold',
+  },
+  appointmentText: {
+    fontSize: 16,
+    marginBottom: 8,
+    // fontWeight: 'bold',
   },
   TouchableOpacity: {
     backgroundColor: '#046665',
