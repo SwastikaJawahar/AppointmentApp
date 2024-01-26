@@ -123,6 +123,7 @@ function ProfileScreen() {
           style={styles.textInput}
           placeholder="Enter email"
           value={userProfile.email}
+          autoCapitalize="none"
           onChangeText={text => setUserProfile({...userProfile, email: text})}
         />
         <TextInput

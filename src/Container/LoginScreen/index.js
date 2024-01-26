@@ -18,7 +18,9 @@ const LoginScreen = ({navigation}) => {
   const handleLogin = async data => {
     try {
       const response = await auth().signInWithEmailAndPassword(email, password);
-      navigation.navigate('HomeStackScreen', {screen: 'DashboardScreen'});
+      navigation.navigate('MainScreen', {
+        screen: 'HomeStackScreen',
+      });
       console.log('User Logged in successfully!', response?.user);
     } catch (error) {
       if (error.code === 'auth/invalid-email') {

@@ -3,11 +3,9 @@ import {
   StyleSheet,
   Text,
   View,
+  Modal,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  Alert,
-  Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
@@ -15,53 +13,71 @@ import firestore from '@react-native-firebase/firestore';
 import DateTimePicker from 'react-native-date-picker';
 import moment from 'moment';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-const BookAppointmentScreen = () => {
-  const [startOpen, setStartOpen] = useState(false);
-  const [endOpen, setEndOpen] = useState(false);
+const BookAppointmentScreen = props => {
   const [date_time, setDate_time] = useState(new Date());
   const [isModalVisible, setModalVisible] = useState(false);
+
   const [customMessage, setCustomMessage] = useState('');
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
+
+  const handleDateChange = selectedDate => {
+    setModalVisible(false);
+    setDate_time(selectedDate);
+  };
   const date = date => {
     return moment(date).format('MMMM Do YYYY');
   };
-  //   const time = time => {
-  //     return moment(time).format('hh:mm');
-  //   };
+  const time = time => {
+    return moment(time).format('hh:mm');
+  };
 
+  function handleClose() {
+    props.navigation.pop();
+  }
   return (
     <SafeAreaView styles={styles.container}>
-      <View styles={styles.View}>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setStartOpen(true);
-          }}>
+      <View style={styles.View}>
+        <Icon
+          style={styles.icon}
+          name="close"
+          onPress={handleClose}
+          size={40}
+          color={'#046665'}
+        />
+        <TouchableOpacity onPress={toggleModal}>
           <View style={styles.textContainer}>
-            <Text>Appointment Date</Text>
-            {/* <Text>{date(date_time)}</Text> */}
+            <Text style={styles.title}>Appointment Date</Text>
+            <TextInput
+              style={styles.input}
+              value={moment(date_time).format('MMMM Do YYYY')}
+              editable={false}
+            />
           </View>
-        </TouchableWithoutFeedback>
-        {startOpen && (
-          <DateTimePicker
-            mode={'date'}
-            date={date_time}
-            onDateChange={setDate_time}
-            isVisible={startOpen}
-            onCancel={() => {
-              setStartOpen(false);
-            }}
-            onConfirm={selectedDate => {
-              setStartOpen(false);
-              setDate_time(selectedDate);
-            }}
-            minimumDate={new Date()} // Optional: Set a minimum date if needed
-            minuteInterval={5}
-          />
-        )}
+        </TouchableOpacity>
+        <Modal
+          style={styles.modal}
+          visible={isModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}>
+          <TouchableWithoutFeedback onPress={toggleModal}>
+            <View style={styles.modalOverlay} />
+          </TouchableWithoutFeedback>
+          <View style={styles.modalContent}>
+            <DateTimePicker
+              mode={'date'}
+              date={date_time}
+              onDateChange={handleDateChange}
+              minimumDate={new Date()}
+              minuteInterval={5}
+            />
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -75,14 +91,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
   },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
   view: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    width: '100%',
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
   textContainer: {
     marginTop: 60,
     alignItems: 'center',
+  },
+  input: {
+    height: 40,
+    width: '80%',
+    borderColor: '#046665',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+  },
+  modal: {
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    margin: 1,
+  },
+  icon: {
+    marginLeft: '89%',
+    marginTop: 10,
   },
   label: {
     fontSize: 18,

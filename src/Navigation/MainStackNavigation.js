@@ -4,7 +4,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import MIcons from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-
+import Icons from 'react-native-vector-icons/Ionicons';
 import LoginScreen from '../Container/LoginScreen';
 import SignUpScreen from '../Container/SignUpScreen';
 import ProfileScreen from '../Container/ProfileScreen';
@@ -17,37 +17,50 @@ import WelcomeScreen from '../Container/WelcomeScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const color = '#046665';
 
 function MyTabs({userType}) {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="ProfileScreen" component={ProfileScreen} />
       <Tab.Screen
-        name="DashboardScreen"
-        component={DashboardScreen}
-        initialParams={{user: userType}}
+        name="ProfileScreen"
+        component={ProfileScreen}
         options={{
-          tabBarIcon: () => <MIcons name="dashboard" size={30} />,
+          tabBarIcon: () => <Icons name="person" size={30} color={color} />,
         }}
       />
       <Tab.Screen
-        name="HistoryScreen"
+        name="Dashboard"
+        component={DashboardScreen}
+        initialParams={{user: userType}}
+        options={{
+          tabBarIcon: () => <MIcons name="dashboard" size={35} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="History"
         component={HistoryScreen}
         initialParams={{user: userType}}
         options={{
-          tabBarIcon: () => <MIcons name="history" size={30} />,
+          tabBarIcon: () => <MIcons name="history" size={35} color={color} />,
         }}
       />
       {userType === 'doctor' && (
         <Tab.Screen
           name="ManageAppointment"
           component={ManageAppointmentScreen}
+          options={{
+            tabBarIcon: () => <Icons name="create" size={35} color={color} />,
+          }}
         />
       )}
       {userType === 'patient' && (
         <Tab.Screen
-          name="CreateAppointment"
+          name="Appointment"
           component={CreateAppointmentScreen}
+          options={{
+            tabBarIcon: () => <Icons name="create" size={35} color={color} />,
+          }}
         />
       )}
     </Tab.Navigator>
@@ -87,10 +100,10 @@ function MainStackNavigation() {
   const [user, setUser] = useState(undefined);
   const [userType, setUserType] = useState(null);
 
-  // useEffect(() => {
-  //   const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-  //   return () => subscriber(); // Cleanup function
-  // }, []);
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return () => subscriber(); // Cleanup function
+  }, []);
 
   function onAuthStateChanged(user) {
     const fetchUserType = async () => {
