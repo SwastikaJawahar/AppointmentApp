@@ -32,6 +32,12 @@ function ProfileScreen() {
     userType: '',
   });
 
+  const [qualifications, setQualifications] = useState(
+    userProfile.qualification || [],
+  );
+  const [experience, setExperience] = useState(userProfile.experience || []);
+  const [newQualification, setNewQualification] = useState('');
+  const [newExperience, setNewExperience] = useState('');
   const renderLabel = () => {
     if (dropVal || isFocus) {
       // const selectedLabel = data.find(item => item.value === dropVal)?.label;
@@ -39,7 +45,18 @@ function ProfileScreen() {
     }
     return null;
   };
+  const addQualification = () => {
+    if (newQualification.trim() !== '') {
+      setQualifications([...qualifications, newQualification]);
+      setNewQualification('');
+    }
+  };
 
+  const deleteQualification = index => {
+    const updatedQualifications = [...qualifications];
+    updatedQualifications.splice(index, 1);
+    setQualifications(updatedQualifications);
+  };
   useEffect(() => {
     // Fetch user profile information from Firestore
     const fetchUserProfile = async () => {
@@ -151,14 +168,25 @@ function ProfileScreen() {
                 setUserProfile({...userProfile, location: text})
               }
             />
+            <Text style={styles.label}>Qualifications:</Text>
+            {qualifications.map((qualification, index) => (
+              <View key={index}>
+                <Text>{qualification}</Text>
+                <TouchableOpacity onPress={() => deleteQualification(index)}>
+                  <Text style={styles.button}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            {/* Text input for adding new qualification */}
             <TextInput
               style={styles.textInput}
-              placeholder="Qualification"
-              value={userProfile.qualification}
-              onChangeText={text =>
-                setUserProfile({...userProfile, qualification: text})
-              }
+              placeholder="Add Qualification"
+              value={newQualification}
+              onChangeText={text => setNewQualification(text)}
             />
+            <TouchableOpacity onPress={addQualification}>
+              <Text style={styles.button}>Add Qualification</Text>
+            </TouchableOpacity>
             <TextInput
               style={styles.textInput}
               placeholder="Experience"

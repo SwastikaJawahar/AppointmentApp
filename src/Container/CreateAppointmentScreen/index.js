@@ -10,9 +10,11 @@ import {
   Modal,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import BookAppointmentScreen from '../BookAppointmentScreen';
 import firestore from '@react-native-firebase/firestore';
+import DateTimePicker from 'react-native-date-picker';
 
-const CreateAppointmentScreen = () => {
+const CreateAppointmentScreen = props => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -20,7 +22,8 @@ const CreateAppointmentScreen = () => {
   const [appointmentDate, setAppointmentDate] = useState(new Date());
   const [appointmentTime, setAppointmentTime] = useState('');
   const [customMessage, setCustomMessage] = useState('');
-
+  const [endOpen, setEndOpen] = useState(false);
+  const [date_time, setDate_time] = useState(new Date());
   const [allDoctors, setAllDoctors] = useState([]);
 
   useEffect(() => {
@@ -90,8 +93,9 @@ const CreateAppointmentScreen = () => {
       <TouchableOpacity
         style={styles.appointmentButton}
         onPress={() => {
-          setSelectedDoctor(item);
-          setModalVisible(true);
+          props.navigation.navigate('BookAppointmentScreen');
+          // setSelectedDoctor(item);
+          // setModalVisible(true);
         }}>
         <Text style={styles.buttonText}>Book Appointment</Text>
       </TouchableOpacity>
@@ -121,11 +125,14 @@ const CreateAppointmentScreen = () => {
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalHeading}>Request Appointment</Text>
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Appointment Date"
-            value={appointmentDate}
-            onChangeText={text => setAppointmentDate(text)}
+          <DateTimePicker
+            mode={'date'}
+            open={endOpen}
+            setOpen={setEndOpen}
+            currentDate={date_time}
+            setCurrentDate={setDate_time}
+            modal={true}
+            minuteInterval={5}
           />
           <TextInput
             style={styles.modalInput}
@@ -181,6 +188,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 16,
     backgroundColor: '#fff',
+    marginTop: 10,
   },
   doctorItem: {
     width: '80%',
