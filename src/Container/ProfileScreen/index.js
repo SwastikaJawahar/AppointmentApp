@@ -7,10 +7,12 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Modal,
+  FlatList,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import {Dropdown} from 'react-native-element-dropdown';
+import Icon from 'react-native-vector-icons/AntDesign';
 
 const data = [
   {label: 'Patient', value: 'Patient'},
@@ -19,8 +21,6 @@ const data = [
 
 function ProfileScreen() {
   const currentUser = auth().currentUser;
-  const [dropVal, setDropVal] = useState(null);
-  const [isFocus, setIsFocus] = useState(false);
   const [userProfile, setUserProfile] = useState({
     contact: '',
     email: '',
@@ -32,31 +32,19 @@ function ProfileScreen() {
     userType: '',
   });
 
-  const [qualifications, setQualifications] = useState(
-    userProfile.qualification || [],
-  );
-  const [experience, setExperience] = useState(userProfile.experience || []);
-  const [newQualification, setNewQualification] = useState('');
-  const [newExperience, setNewExperience] = useState('');
-  const renderLabel = () => {
-    if (dropVal || isFocus) {
-      // const selectedLabel = data.find(item => item.value === dropVal)?.label;
-      // return <Text style={[styles.label, isFocus && {color: 'blue'}]}></Text>;
-    }
-    return null;
-  };
-  const addQualification = () => {
-    if (newQualification.trim() !== '') {
-      setQualifications([...qualifications, newQualification]);
-      setNewQualification('');
-    }
-  };
+  const [qualificationModalVisible, setQualificationModalVisible] =
+    useState(false);
+  const [experienceModalVisible, setExperienceModalVisible] = useState(false);
+  const [degreeName, setDegreeName] = useState('');
+  const [institute, setInstitute] = useState('');
+  const [passingYear, setPassingYear] = useState('');
+  const [clinic, setClinic] = useState('');
+  const [startYear, setStartYear] = useState('');
+  const [endYear, setEndYear] = useState('');
+  const [description, setDescription] = useState('');
+  const [qualifications, setQualifications] = useState([]);
+  const [experiences, setExperiences] = useState([]);
 
-  const deleteQualification = index => {
-    const updatedQualifications = [...qualifications];
-    updatedQualifications.splice(index, 1);
-    setQualifications(updatedQualifications);
-  };
   useEffect(() => {
     // Fetch user profile information from Firestore
     const fetchUserProfile = async () => {
@@ -73,8 +61,47 @@ function ProfileScreen() {
         console.error('Error fetching user profile:', error);
       }
     };
+    const fetchQualifications = async () => {
+      try {
+        const uid = auth().currentUser.uid;
+        const qualificationRef = firestore()
+          .collection('Qualification')
+          .where('uid', '==', uid);
+
+        qualificationRef.onSnapshot(querySnapshot => {
+          const data = [];
+          querySnapshot.forEach(doc => {
+            data.push(doc.data());
+          });
+          setQualifications(data);
+        });
+      } catch (error) {
+        console.error('Error fetching qualifications:', error);
+      }
+    };
+
+    const fetchExperiences = async () => {
+      try {
+        const uid = auth().currentUser.uid;
+        const experienceRef = firestore()
+          .collection('Experience')
+          .where('uid', '==', uid);
+
+        experienceRef.onSnapshot(querySnapshot => {
+          const data = [];
+          querySnapshot.forEach(doc => {
+            data.push(doc.data());
+          });
+          setExperiences(data);
+        });
+      } catch (error) {
+        console.error('Error fetching experiences:', error);
+      }
+    };
 
     fetchUserProfile();
+    fetchQualifications();
+    fetchExperiences();
   }, []);
   const handleSaveProfile = async () => {
     // Save the updated profile back to Firestore
@@ -98,8 +125,8 @@ function ProfileScreen() {
           contact: userProfile.contact,
           location: userProfile.location,
           specialty: userProfile.specialty,
-          qualification: userProfile.qualification,
-          experience: userProfile.experience,
+          // qualification: userProfile.qualification,
+          // experience: userProfile.experience,
         });
       }
 
@@ -107,6 +134,36 @@ function ProfileScreen() {
       Alert.alert('User Updated Successfully.!');
     } catch (error) {
       console.error('Error updating user profile:', error);
+    }
+  };
+  const handleAddQualification = async () => {
+    try {
+      const uid = auth().currentUser.uid;
+      await firestore().collection('Qualification').add({
+        uid,
+        degreeName,
+        institute,
+        passingYear,
+      });
+      setQualificationModalVisible(false);
+    } catch (error) {
+      console.error('Error adding qualification:', error);
+    }
+  };
+
+  const handleAddExperience = async () => {
+    try {
+      const uid = auth().currentUser.uid;
+      await firestore().collection('Experience').add({
+        uid,
+        clinic,
+        startYear,
+        endYear,
+        description,
+      });
+      setExperienceModalVisible(false);
+    } catch (error) {
+      console.error('Error adding experience:', error);
     }
   };
 
@@ -132,10 +189,10 @@ function ProfileScreen() {
           value={userProfile.contact}
           onChangeText={text => setUserProfile({...userProfile, contact: text})}
         />
-        <View>
+        {/* <View>
           {renderLabel()}
           <Dropdown
-            style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+            style={[styles.dropdown, isFocus]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
             data={data}
@@ -150,7 +207,7 @@ function ProfileScreen() {
               setIsFocus(false);
             }}
           />
-        </View>
+        </View> */}
         {userProfile.userType === 'doctor' && (
           <View>
             <TextInput
@@ -169,43 +226,187 @@ function ProfileScreen() {
                 setUserProfile({...userProfile, location: text})
               }
             />
-            <Text style={styles.label}>Qualifications:</Text>
-            {qualifications.map((qualification, index) => (
-              <View key={index}>
-                <Text>{qualification}</Text>
-                <TouchableOpacity onPress={() => deleteQualification(index)}>
-                  <Text style={styles.button}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-            {/* Text input for adding new qualification */}
-            <TextInput
-              style={styles.textInput}
-              placeholder="Add Qualification"
-              value={newQualification}
-              onChangeText={text => setNewQualification(text)}
-            />
-            <TouchableOpacity onPress={addQualification}>
-              <Text style={styles.button}>Add Qualification</Text>
-            </TouchableOpacity>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Experience"
-              value={userProfile.experience}
-              onChangeText={text =>
-                setUserProfile({...userProfile, experience: text})
-              }
-            />
           </View>
         )}
+        <View style={styles.inputContainer}>
+          <FlatList
+            style={styles.FlatList}
+            contentContainerStyle={{flexGrow: 1}}
+            data={qualifications}
+            keyExtractor={item => item.id}
+            ListHeaderComponent={() => (
+              <View style={styles.listView}>
+                <View style={styles.listItem}>
+                  <Text style={styles.subHeading}>Degree</Text>
+                  <Text style={styles.subHeading}>Institute</Text>
+                  <Text style={styles.subHeading}>Year</Text>
+                </View>
+                {qualifications.map(item => (
+                  <View style={styles.listItem}>
+                    <Text>{item.degreeName}</Text>
+                    <Text>{item.institute}</Text>
+                    <Text>{item.passingYear}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          />
+          <TouchableOpacity onPress={() => setQualificationModalVisible(true)}>
+            <Icon
+              style={styles.Icon}
+              name="addfile"
+              size={35}
+              color={'#046665'}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.inputContainer}>
+          <FlatList
+            style={styles.FlatList}
+            contentContainerStyle={{flexGrow: 1}}
+            data={experiences}
+            keyExtractor={item => item.id}
+            ListHeaderComponent={() => (
+              <View style={styles.listView}>
+                <View style={styles.listItem}>
+                  <Text style={styles.subHeading}>Clinic</Text>
+                  <Text style={styles.subHeading}>StartYear</Text>
+                  <Text style={styles.subHeading}>EndYear</Text>
+                  {/* <Text style={styles.subHeading}>Description</Text> */}
+                </View>
+                {experiences.map(item => (
+                  <View style={styles.listItem} key={`header_${item.id}`}>
+                    <Text>{item.clinic}</Text>
+                    <Text>{item.startYear}</Text>
+                    <Text>{item.endYear}</Text>
+                    {/* <Text>{item.description}</Text> */}
+                  </View>
+                ))}
+              </View>
+            )}
+          />
+          <TouchableOpacity onPress={() => setExperienceModalVisible(true)}>
+            <Icon
+              style={styles.Icon}
+              name="addfile"
+              size={35}
+              color={'#046665'}
+            />
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity style={styles.action} onPress={handleSaveProfile}>
           <Text style={styles.buttonText}>Save</Text>
         </TouchableOpacity>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={qualificationModalVisible}
+          onRequestClose={() => setQualificationModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={styles.subHeading}>Add Qualification</Text>
+                <TouchableOpacity
+                  onPress={() => setQualificationModalVisible(false)}>
+                  <Icon
+                    style={styles.closeIcon}
+                    name="close"
+                    size={30}
+                    color={'#046665'}
+                  />
+                </TouchableOpacity>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Degree Name"
+                value={degreeName}
+                onChangeText={text => setDegreeName(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Institute"
+                value={institute}
+                onChangeText={text => setInstitute(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Passing Year"
+                value={passingYear}
+                onChangeText={text => setPassingYear(text)}
+              />
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleAddQualification}>
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Experience Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={experienceModalVisible}
+          onRequestClose={() => setExperienceModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={styles.subHeading}>Add Experience</Text>
+                <TouchableOpacity
+                  onPress={() => setQualificationModalVisible(false)}>
+                  <Icon
+                    style={styles.closeIcon}
+                    name="close"
+                    size={30}
+                    color={'#046665'}
+                  />
+                </TouchableOpacity>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Clinic"
+                value={clinic}
+                onChangeText={text => setClinic(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Start Year"
+                value={startYear}
+                onChangeText={text => setStartYear(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="End Year"
+                value={endYear}
+                onChangeText={text => setEndYear(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Description"
+                value={description}
+                onChangeText={text => setDescription(text)}
+              />
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleAddExperience}>
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setExperienceModalVisible(false)}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
 }
-
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
@@ -224,18 +425,69 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginLeft: 10,
   },
-  errorText: {
-    color: 'red',
+  FlatList: {
+    paddingHorizontal: 10,
+    marginBottom: 16,
   },
-  dropdown: {
+  Icon: {
+    marginRight: 15,
+    marginTop: 15,
+  },
+  closeIcon: {
+    marginLeft: 110,
+    marginBottom: 20,
+  },
+  addButton: {color: '#046665', fontSize: 16, fontWeight: 'bold'},
+  subHeading: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  input: {
     height: 40,
-    width: '90%',
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 16,
-    marginLeft: 10,
+  },
+  submitButton: {
+    backgroundColor: '#046665',
+    paddingVertical: 12,
+    width: '50%',
+    paddingHorizontal: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 90,
+    marginTop: 10,
+  },
+  listItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  listView: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start', // Adjust as needed
+    justifyContent: 'flex-start',
   },
   label: {
     position: 'absolute',
