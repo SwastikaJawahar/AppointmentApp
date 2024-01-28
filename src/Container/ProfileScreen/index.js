@@ -103,6 +103,109 @@ function ProfileScreen() {
     fetchQualifications();
     fetchExperiences();
   }, []);
+
+  const renderDoctorFields = () => {
+    if (userProfile.userType === 'doctor') {
+      return (
+        <View>
+          <TextInput
+            style={styles.textInput}
+            placeholder="specialty"
+            value={userProfile.specialty}
+            onChangeText={text =>
+              setUserProfile({...userProfile, specialty: text})
+            }
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="location"
+            value={userProfile.location}
+            onChangeText={text =>
+              setUserProfile({...userProfile, location: text})
+            }
+          />
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const renderQualificationsAndExperiences = () => {
+    if (userProfile.userType === 'doctor') {
+      return (
+        <View>
+          <View style={styles.inputContainer}>
+            <FlatList
+              style={styles.FlatList}
+              contentContainerStyle={{flexGrow: 1}}
+              data={qualifications}
+              keyExtractor={item => item.id}
+              ListHeaderComponent={() => (
+                <View style={styles.listView}>
+                  <View style={styles.listItem}>
+                    <Text style={styles.subHeading}>Degree</Text>
+                    <Text style={styles.subHeading}>Institute</Text>
+                    <Text style={styles.subHeading}>Year</Text>
+                  </View>
+                  {qualifications.map(item => (
+                    <View style={styles.listItem} key={item.id}>
+                      <Text>{item.degreeName}</Text>
+                      <Text>{item.institute}</Text>
+                      <Text>{item.passingYear}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            />
+            <TouchableOpacity
+              onPress={() => setQualificationModalVisible(true)}>
+              <Icon
+                style={styles.Icon}
+                name="addfile"
+                size={35}
+                color={'#046665'}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <FlatList
+              style={styles.FlatList}
+              contentContainerStyle={{flexGrow: 1}}
+              data={experiences}
+              keyExtractor={item => item.id}
+              ListHeaderComponent={() => (
+                <View style={styles.listView}>
+                  <View style={styles.listItem}>
+                    <Text style={styles.subHeading}>Clinic</Text>
+                    <Text style={styles.subHeading}>StartYear</Text>
+                    <Text style={styles.subHeading}>EndYear</Text>
+                  </View>
+                  {experiences.map(item => (
+                    <View style={styles.listItem} key={`header_${item.id}`}>
+                      <Text>{item.clinic}</Text>
+                      <Text>{item.startYear}</Text>
+                      <Text>{item.endYear}</Text>
+                      <Text>{item.description}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            />
+            <TouchableOpacity onPress={() => setExperienceModalVisible(true)}>
+              <Icon
+                style={styles.Icon}
+                name="addfile"
+                size={35}
+                color={'#046665'}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    }
+    return null;
+  };
   const handleSaveProfile = async () => {
     // Save the updated profile back to Firestore
     try {
@@ -189,112 +292,10 @@ function ProfileScreen() {
           value={userProfile.contact}
           onChangeText={text => setUserProfile({...userProfile, contact: text})}
         />
-        {/* <View>
-          {renderLabel()}
-          <Dropdown
-            style={[styles.dropdown, isFocus]}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            data={data}
-            labelField="label"
-            valueField="value"
-            placeholder={!isFocus ? 'Select User Type' : '...'}
-            value={dropVal}
-            onFocus={() => setIsFocus(true)}
-            onBlur={() => setIsFocus(false)}
-            onChange={item => {
-              setDropVal(item.value);
-              setIsFocus(false);
-            }}
-          />
-        </View> */}
-        {userProfile.userType === 'doctor' && (
-          <View>
-            <TextInput
-              style={styles.textInput}
-              placeholder="specialty"
-              value={userProfile.specialty}
-              onChangeText={text =>
-                setUserProfile({...userProfile, specialty: text})
-              }
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="location"
-              value={userProfile.location}
-              onChangeText={text =>
-                setUserProfile({...userProfile, location: text})
-              }
-            />
-          </View>
-        )}
-        <View style={styles.inputContainer}>
-          <FlatList
-            style={styles.FlatList}
-            contentContainerStyle={{flexGrow: 1}}
-            data={qualifications}
-            keyExtractor={item => item.id}
-            ListHeaderComponent={() => (
-              <View style={styles.listView}>
-                <View style={styles.listItem}>
-                  <Text style={styles.subHeading}>Degree</Text>
-                  <Text style={styles.subHeading}>Institute</Text>
-                  <Text style={styles.subHeading}>Year</Text>
-                </View>
-                {qualifications.map(item => (
-                  <View style={styles.listItem}>
-                    <Text>{item.degreeName}</Text>
-                    <Text>{item.institute}</Text>
-                    <Text>{item.passingYear}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          />
-          <TouchableOpacity onPress={() => setQualificationModalVisible(true)}>
-            <Icon
-              style={styles.Icon}
-              name="addfile"
-              size={35}
-              color={'#046665'}
-            />
-          </TouchableOpacity>
-        </View>
 
-        <View style={styles.inputContainer}>
-          <FlatList
-            style={styles.FlatList}
-            contentContainerStyle={{flexGrow: 1}}
-            data={experiences}
-            keyExtractor={item => item.id}
-            ListHeaderComponent={() => (
-              <View style={styles.listView}>
-                <View style={styles.listItem}>
-                  <Text style={styles.subHeading}>Clinic</Text>
-                  <Text style={styles.subHeading}>StartYear</Text>
-                  <Text style={styles.subHeading}>EndYear</Text>
-                  {/* <Text style={styles.subHeading}>Description</Text> */}
-                </View>
-                {experiences.map(item => (
-                  <View style={styles.listItem} key={`header_${item.id}`}>
-                    <Text>{item.clinic}</Text>
-                    <Text>{item.startYear}</Text>
-                    <Text>{item.endYear}</Text>
-                    {/* <Text>{item.description}</Text> */}
-                  </View>
-                ))}
-              </View>
-            )}
-          />
-          <TouchableOpacity onPress={() => setExperienceModalVisible(true)}>
-            <Icon
-              style={styles.Icon}
-              name="addfile"
-              size={35}
-              color={'#046665'}
-            />
-          </TouchableOpacity>
-        </View>
+        {renderDoctorFields()}
+
+        {renderQualificationsAndExperiences()}
 
         <TouchableOpacity style={styles.action} onPress={handleSaveProfile}>
           <Text style={styles.buttonText}>Save</Text>

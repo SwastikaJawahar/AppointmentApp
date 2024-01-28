@@ -14,11 +14,34 @@ const CreateAppointmentScreen = props => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [allDoctors, setAllDoctors] = useState([]);
+  const [viewProfileModalVisible, setViewProfileModalVisible] = useState(false);
+  const [doctorProfile, setDoctorProfile] = useState(null);
 
   useEffect(() => {
     // Load all doctors initially
     loadAllDoctors();
   }, []);
+
+  const getDoctorDataById = async (doctorId, collectionName) => {
+    try {
+      const doctorDataRef = firestore().collection(collectionName);
+      const querySnapshot = await doctorDataRef
+        .where('uid', '==', doctorId)
+        .get();
+
+      const doctorData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return doctorData;
+    } catch (error) {
+      console.log(
+        `Error fetching ${collectionName} for doctor ID ${doctorId}:`,
+        error,
+      );
+    }
+  };
   const loadAllDoctors = async () => {
     try {
       const doctorsRef = firestore().collection('UserProfile');
@@ -47,25 +70,27 @@ const CreateAppointmentScreen = props => {
   };
 
   const renderDoctorItem = ({item}) => (
-    <TouchableOpacity
-      style={styles.doctorItem}
-      onPress={() => setSelectedDoctor(item)}>
-      <Text style={styles.doctorName}>{item.name}</Text>
-      <Text style={styles.doctorDetails}>{item.specialty}</Text>
-      <Text style={styles.doctorDetails}>{item.location}</Text>
-      <Text style={styles.doctorDetails}>{item.contact}</Text>
+    <View>
       <TouchableOpacity
-        style={styles.appointmentButton}
-        onPress={() => {
-          setSelectedDoctor(item);
-          props.navigation.navigate('BookAppointmentScreen', {
-            setSelectedDoctor: selectedDoctor,
-          });
-          // setModalVisible(true);
-        }}>
-        <Text style={styles.buttonText}>Book Appointment</Text>
+        style={styles.doctorItem}
+        onPress={() => setSelectedDoctor(item)}>
+        <Text style={styles.doctorName}>{item.name}</Text>
+        <Text style={styles.doctorDetails}>{item.specialty}</Text>
+        <Text style={styles.doctorDetails}>{item.location}</Text>
+        <Text style={styles.doctorDetails}>{item.contact}</Text>
+        <TouchableOpacity
+          style={styles.appointmentButton}
+          onPress={() => {
+            setSelectedDoctor(item);
+            props.navigation.navigate('BookAppointmentScreen', {
+              setSelectedDoctor: selectedDoctor,
+            });
+            // setModalVisible(true);
+          }}>
+          <Text style={styles.buttonText}>Book Appointment</Text>
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
