@@ -1,10 +1,12 @@
 import React, {useState, useEffect} from 'react';
+import {View, Text, TouchableOpacity} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import MIcons from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Icons from 'react-native-vector-icons/Ionicons';
+import SIcons from 'react-native-vector-icons/SimpleLineIcons';
 import LoginScreen from '../Container/LoginScreen';
 import SignUpScreen from '../Container/SignUpScreen';
 import ProfileScreen from '../Container/ProfileScreen';
@@ -20,6 +22,14 @@ const Tab = createBottomTabNavigator();
 const color = '#046665';
 
 function MyTabs({userType}) {
+  const handleLogout = async () => {
+    try {
+      await auth().signOut();
+      console.log('User Logged Out Successfully');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
   return (
     <Tab.Navigator>
       <Tab.Screen
@@ -27,6 +37,13 @@ function MyTabs({userType}) {
         component={ProfileScreen}
         options={{
           tabBarIcon: () => <Icons name="person" size={30} color={color} />,
+          headerRight: () => (
+            <View style={{marginRight: 20}}>
+              <TouchableOpacity onPress={handleLogout}>
+                <SIcons name="logout" size={35} color={color} />
+              </TouchableOpacity>
+            </View>
+          ),
         }}
       />
       <Tab.Screen
