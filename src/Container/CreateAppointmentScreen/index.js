@@ -57,31 +57,6 @@ const CreateAppointmentScreen = props => {
     setSearchResults(filteredDoctors);
   };
 
-  const requestAppointment = async () => {
-    try {
-      const userId = auth().currentUser.uid;
-      const userName = auth().currentUser.displayName;
-      console.log(userName);
-      const appointmentRef = firestore().collection('Appointment');
-
-      // Add the appointment record
-      await appointmentRef.add({
-        doctorId: selectedDoctor.id,
-        patientId: userId,
-        patientName: userName,
-        doctorName: selectedDoctor.name,
-        appointmentDate,
-        appointmentTime,
-        customMessage,
-        status: 'pending',
-      });
-      Alert.alert('Appointment Booked Successfully.!');
-      setModalVisible(false);
-    } catch (error) {
-      console.error('Error requesting appointment:', error);
-    }
-  };
-
   const renderDoctorItem = ({item}) => (
     <TouchableOpacity
       style={styles.doctorItem}
@@ -93,8 +68,10 @@ const CreateAppointmentScreen = props => {
       <TouchableOpacity
         style={styles.appointmentButton}
         onPress={() => {
-          props.navigation.navigate('BookAppointmentScreen');
-          // setSelectedDoctor(item);
+          setSelectedDoctor(item);
+          props.navigation.navigate('BookAppointmentScreen', {
+            setSelectedDoctor: selectedDoctor,
+          });
           // setModalVisible(true);
         }}>
         <Text style={styles.buttonText}>Book Appointment</Text>
@@ -117,47 +94,6 @@ const CreateAppointmentScreen = props => {
         renderItem={renderDoctorItem}
         ListEmptyComponent={<Text>No doctors found</Text>}
       />
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalHeading}>Request Appointment</Text>
-          <DateTimePicker
-            mode={'date'}
-            open={endOpen}
-            setOpen={setEndOpen}
-            currentDate={date_time}
-            setCurrentDate={setDate_time}
-            modal={true}
-            minuteInterval={5}
-          />
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Appointment Time"
-            value={appointmentTime}
-            onChangeText={text => setAppointmentTime(text)}
-          />
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Custom Message"
-            value={customMessage}
-            onChangeText={text => setCustomMessage(text)}
-          />
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={requestAppointment}>
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={() => setModalVisible(false)}>
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -219,34 +155,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
-  modalHeading: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  modalInput: {
-    height: 40,
-    width: '80%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 16,
-    backgroundColor: 'white',
-  },
-  modalButton: {
-    backgroundColor: '#046665',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    marginTop: 16,
   },
 });
 
