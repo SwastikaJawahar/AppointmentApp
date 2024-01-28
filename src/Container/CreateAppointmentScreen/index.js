@@ -6,24 +6,13 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  Alert,
-  Modal,
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
-import BookAppointmentScreen from '../BookAppointmentScreen';
 import firestore from '@react-native-firebase/firestore';
-import DateTimePicker from 'react-native-date-picker';
 
 const CreateAppointmentScreen = props => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [appointmentDate, setAppointmentDate] = useState(new Date());
-  const [appointmentTime, setAppointmentTime] = useState('');
-  const [customMessage, setCustomMessage] = useState('');
-  const [endOpen, setEndOpen] = useState(false);
-  const [date_time, setDate_time] = useState(new Date());
   const [allDoctors, setAllDoctors] = useState([]);
 
   useEffect(() => {

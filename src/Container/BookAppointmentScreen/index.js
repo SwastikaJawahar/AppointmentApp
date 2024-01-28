@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -45,14 +45,6 @@ const BookAppointmentScreen = props => {
     setTimeModalVisible(false);
     // Handle the selected time as needed
   };
-
-  const date = date => {
-    return moment(date).format('MMMM Do YYYY');
-  };
-  const time = time => {
-    return moment(time).format('hh:mm');
-  };
-
   function handleClose() {
     props.navigation.pop();
   }
@@ -150,9 +142,9 @@ const BookAppointmentScreen = props => {
             />
           </View>
         </Modal>
-        <Text style={styles.messagetitle}>Custom Message</Text>
+        <Text style={styles.messageTitle}>Custom Message</Text>
         <TextInput
-          style={styles.messageinput}
+          style={styles.messageInput}
           onChangeText={text => setCustomMessage(text)}
           placeholder="Enter Custom Message"
           value={customMessage}
@@ -180,7 +172,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
-  messagetitle: {
+  messageTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginLeft: '30%',
@@ -230,7 +222,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
   },
-  messageinput: {
+  messageInput: {
     height: 40,
     width: '80%',
     borderColor: '#046665',
