@@ -140,18 +140,29 @@ function ProfileScreen() {
               contentContainerStyle={{flexGrow: 1}}
               data={qualifications}
               keyExtractor={item => item.id}
+              // eslint-disable-next-line react/no-unstable-nested-components
               ListHeaderComponent={() => (
                 <View style={styles.listView}>
                   <View style={styles.listItem}>
                     <Text style={styles.subHeading}>Degree</Text>
                     <Text style={styles.subHeading}>Institute</Text>
                     <Text style={styles.subHeading}>Year</Text>
+                    <Text style={styles.subHeading}>Delete</Text>
                   </View>
                   {qualifications.map(item => (
                     <View style={styles.listItem} key={item.id}>
                       <Text>{item.degreeName}</Text>
                       <Text>{item.institute}</Text>
                       <Text>{item.passingYear}</Text>
+                      <TouchableOpacity
+                        onPress={() => handleDeleteQualification(item.id)}>
+                        <Icon
+                          style={styles.deleteIcon}
+                          name="delete"
+                          size={20}
+                          color={'#046665'}
+                        />
+                      </TouchableOpacity>
                     </View>
                   ))}
                 </View>
@@ -167,15 +178,6 @@ function ProfileScreen() {
                   color={'#046665'}
                 />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleDeleteQualification(item.id)}>
-                <Icon
-                  style={styles.Icon}
-                  name="delete"
-                  size={30}
-                  color={'#046665'}
-                />
-              </TouchableOpacity>
             </View>
           </View>
 
@@ -185,19 +187,29 @@ function ProfileScreen() {
               contentContainerStyle={{flexGrow: 1}}
               data={experiences}
               keyExtractor={item => item.id}
+              // eslint-disable-next-line react/no-unstable-nested-components
               ListHeaderComponent={() => (
                 <View style={styles.listView}>
                   <View style={styles.listItem}>
                     <Text style={styles.subHeading}>Clinic</Text>
                     <Text style={styles.subHeading}>StartYear</Text>
                     <Text style={styles.subHeading}>EndYear</Text>
+                    <Text style={styles.subHeading}>Delete</Text>
                   </View>
                   {experiences.map(item => (
                     <View style={styles.listItem} key={`header_${item.id}`}>
                       <Text>{item.clinic}</Text>
                       <Text>{item.startYear}</Text>
                       <Text>{item.endYear}</Text>
-                      <Text>{item.description}</Text>
+                      <TouchableOpacity
+                        onPress={() => setExperienceModalVisible(true)}>
+                        <Icon
+                          style={styles.deleteIcon}
+                          name="delete"
+                          size={20}
+                          color={'#046665'}
+                        />
+                      </TouchableOpacity>
                     </View>
                   ))}
                 </View>
@@ -208,14 +220,6 @@ function ProfileScreen() {
                 <Icon
                   style={styles.Icon}
                   name="addfile"
-                  size={30}
-                  color={'#046665'}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setExperienceModalVisible(true)}>
-                <Icon
-                  style={styles.Icon}
-                  name="delete"
                   size={30}
                   color={'#046665'}
                 />
@@ -249,8 +253,6 @@ function ProfileScreen() {
           contact: userProfile.contact,
           location: userProfile.location,
           specialty: userProfile.specialty,
-          // qualification: userProfile.qualification,
-          // experience: userProfile.experience,
         });
       }
 
@@ -474,7 +476,11 @@ const styles = StyleSheet.create({
   },
   Icon: {
     marginRight: 15,
-    marginTop: 5,
+    marginTop: 25,
+  },
+  deleteIcon: {
+    marginRight: 15,
+    marginTop: -2,
   },
   closeIcon: {
     marginLeft: 110,
