@@ -21,7 +21,6 @@ const DashboardScreen = props => {
           const userData = userSnapshot.data();
           setUserType(userData.userType);
 
-          // Now that we have the userType, fetch appointments
           const userId = auth().currentUser.uid;
           const appointmentRef = firestore().collection('Appointment');
 

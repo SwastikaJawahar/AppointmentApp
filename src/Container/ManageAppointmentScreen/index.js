@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import Icons from 'react-native-vector-icons/Ionicons';
 
 const ManageAppointmentScreen = () => {
   const [appointments, setAppointments] = useState([]);
@@ -90,6 +91,13 @@ const ManageAppointmentScreen = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
+          <Icons
+            style={styles.icon}
+            name="close"
+            onPress={() => setModalVisible(false)}
+            color={'#046665'}
+            size={40}
+          />
           <Text style={styles.modalHeading}>Appointment Details</Text>
           <Text
             style={
@@ -99,6 +107,10 @@ const ManageAppointmentScreen = () => {
             style={
               styles.modalText
             }>{`Date: ${selectedAppointment?.appointmentDate}, Time: ${selectedAppointment?.appointmentTime}`}</Text>
+          <Text
+            style={
+              styles.appointmentName
+            }>{`Message: ${selectedAppointment?.customMessage}`}</Text>
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={styles.modalButton}
@@ -111,11 +123,6 @@ const ManageAppointmentScreen = () => {
               <Text style={styles.buttonText}>Reject</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={() => setModalVisible(false)}>
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
         </View>
       </Modal>
     </View>
@@ -130,6 +137,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#e3f1f1',
+  },
+  icon: {
+    marginLeft: '80%',
+    marginBottom: 10,
   },
   FlatList: {
     width: '100%',
