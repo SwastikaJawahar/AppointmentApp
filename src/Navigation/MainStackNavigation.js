@@ -16,6 +16,7 @@ import ManageAppointmentScreen from '../Container/ManageAppointmentScreen';
 import DashboardScreen from '../Container/DashboardScreen';
 import BookAppointmentScreen from '../Container/BookAppointmentScreen';
 import WelcomeScreen from '../Container/WelcomeScreen';
+import PubNubScreen from '../Container/PubNubScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -54,6 +55,7 @@ function MyTabs({userType}) {
           tabBarIcon: () => <MIcons name="dashboard" size={35} color={color} />,
         }}
       />
+
       <Tab.Screen
         name="History"
         component={HistoryScreen}
@@ -95,6 +97,8 @@ function HomeStackScreen({userType}) {
         component={BookAppointmentScreen}
         options={{headerShown: false}}
       />
+      <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
+      <Stack.Screen name="ChatScreen" component={PubNubScreen} />
     </Stack.Navigator>
   );
 }

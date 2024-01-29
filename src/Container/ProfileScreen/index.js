@@ -71,7 +71,7 @@ function ProfileScreen() {
         qualificationRef.onSnapshot(querySnapshot => {
           const data = [];
           querySnapshot.forEach(doc => {
-            data.push(doc.data());
+            data.push({id: doc.id, ...doc.data()});
           });
           setQualifications(data);
         });
@@ -90,7 +90,7 @@ function ProfileScreen() {
         experienceRef.onSnapshot(querySnapshot => {
           const data = [];
           querySnapshot.forEach(doc => {
-            data.push(doc.data());
+            data.push({id: doc.id, ...doc.data()});
           });
           setExperiences(data);
         });
@@ -157,15 +157,26 @@ function ProfileScreen() {
                 </View>
               )}
             />
-            <TouchableOpacity
-              onPress={() => setQualificationModalVisible(true)}>
-              <Icon
-                style={styles.Icon}
-                name="addfile"
-                size={35}
-                color={'#046665'}
-              />
-            </TouchableOpacity>
+            <View style={{flexDirection: 'column'}}>
+              <TouchableOpacity
+                onPress={() => setQualificationModalVisible(true)}>
+                <Icon
+                  style={styles.Icon}
+                  name="addfile"
+                  size={30}
+                  color={'#046665'}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleDeleteQualification(item.id)}>
+                <Icon
+                  style={styles.Icon}
+                  name="delete"
+                  size={30}
+                  color={'#046665'}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.inputContainer}>
@@ -192,14 +203,24 @@ function ProfileScreen() {
                 </View>
               )}
             />
-            <TouchableOpacity onPress={() => setExperienceModalVisible(true)}>
-              <Icon
-                style={styles.Icon}
-                name="addfile"
-                size={35}
-                color={'#046665'}
-              />
-            </TouchableOpacity>
+            <View style={{flexDirection: 'column'}}>
+              <TouchableOpacity onPress={() => setExperienceModalVisible(true)}>
+                <Icon
+                  style={styles.Icon}
+                  name="addfile"
+                  size={30}
+                  color={'#046665'}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setExperienceModalVisible(true)}>
+                <Icon
+                  style={styles.Icon}
+                  name="delete"
+                  size={30}
+                  color={'#046665'}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       );
@@ -267,6 +288,27 @@ function ProfileScreen() {
       setExperienceModalVisible(false);
     } catch (error) {
       console.error('Error adding experience:', error);
+    }
+  };
+
+  const handleDeleteQualification = async qualificationId => {
+    try {
+      console.log('Delete Qualification triggered', qualificationId);
+      await firestore()
+        .collection('Qualification')
+        .doc(qualificationId)
+        .delete();
+    } catch (error) {
+      console.error('Error deleting qualification:', error);
+    }
+  };
+
+  const handleDeleteExperience = async experienceId => {
+    try {
+      console.log('Delete Experience triggered', experienceId);
+      await firestore().collection('Experience').doc(experienceId).delete();
+    } catch (error) {
+      console.error('Error deleting experience:', error);
     }
   };
 
@@ -432,7 +474,7 @@ const styles = StyleSheet.create({
   },
   Icon: {
     marginRight: 15,
-    marginTop: 15,
+    marginTop: 5,
   },
   closeIcon: {
     marginLeft: 110,

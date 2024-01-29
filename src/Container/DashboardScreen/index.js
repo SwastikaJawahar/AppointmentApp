@@ -3,10 +3,14 @@ import React, {useState, useEffect} from 'react';
 import auth from '@react-native-firebase/auth';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
+import PubNubScreen from '../PubNubScreen';
+import {useNavigation} from '@react-navigation/native';
 
 const DashboardScreen = props => {
   const [appointments, setAppointments] = useState([]);
   const [userType, setUserType] = useState('');
+  const navigation = useNavigation();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,7 +75,9 @@ const DashboardScreen = props => {
         }>{`Custom Message: ${item.customMessage}`}</Text>
       <Text style={styles.appointmentText}>{`Status: ${item.status}`}</Text>
       {item.status === 'approved' && (
-        <TouchableOpacity style={styles.chatButton} onPress={() => {}}>
+        <TouchableOpacity
+          style={styles.chatButton}
+          onPress={() => handleChat(item, userType)}>
           <Text style={styles.buttonText}>Chat</Text>
         </TouchableOpacity>
       )}
@@ -86,6 +92,9 @@ const DashboardScreen = props => {
     } catch (error) {
       console.error('Error logging out:', error);
     }
+  };
+  const handleChat = (user, userType) => {
+    navigation.navigate('ChatScreen', {user, userType});
   };
   return (
     <View style={styles.container}>
@@ -117,6 +126,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#e3f1f1',
+  },
+  chatButton: {
+    width: '50%',
+    backgroundColor: '#046665',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 20,
   },
   FlatList: {
     width: '100%',
